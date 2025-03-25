@@ -1,1 +1,4 @@
 /target
+Cargo.lock
+.DS_Store
+migrations/20250325054145_create_subscriptions_table.sql
