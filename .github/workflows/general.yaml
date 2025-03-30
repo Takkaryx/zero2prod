@@ -1,5 +1,15 @@
 name: Rust
 
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+
+
 env:
   CARGO_TERM_COLOR: always
   SQLX_VERSION: 0.8.0
