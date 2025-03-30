@@ -1,6 +1,6 @@
 //! src/routes/subscriptions.rs
 
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder, web};
 use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
