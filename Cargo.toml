@@ -28,16 +28,15 @@ tracing-actix-web = "0.7.16"
 serde-aux = "4.6.0"
 
 [dependencies.sqlx]
-version = "0.6"
-default-features = false
+version = "0.8.4"
 features = [
   "runtime-tokio-rustls",
   "macros",
+  "sqlx-macros",
   "postgres",
   "uuid",
   "chrono",
   "migrate",
-  "offline",
 ]
 
 [dev-dependencies]

@@ -38,8 +38,6 @@ pub async fn insert_subscriber(pool: &PgPool, form: &FormData) -> Result<(), sql
         form.name,
         Utc::now()
     )
-    // We use 'get_ref' to get an immutable reference to the 'PgConnection'
-    // wrapped by 'web::Data'
     .execute(pool)
     .await
     .map_err(|e| {
