@@ -1,4 +1,4 @@
-FROM rust:1 AS chef 
+FROM rust:1.86.0 AS chef
 # We only pay the installation cost once, 
 # it will be cached from the second build onwards
 RUN cargo install cargo-chef 
@@ -18,7 +18,7 @@ COPY . .
 ENV SQLX_OFFLINE=true
 RUN cargo build --release --bin zero2prod
 
-FROM debian:bookworm-slim AS runtime
+FROM rust:1.86.0-slim-bookworm AS runtime
 WORKDIR /app
 RUN apt-get update -y \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
