@@ -1,4 +1,5 @@
-FROM rust:1.86.0 AS chef
+# FROM rust:1.86.0-slim-bookworm AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.80.1 as chef
 # We only pay the installation cost once, 
 # it will be cached from the second build onwards
 RUN cargo install cargo-chef 
