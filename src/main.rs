@@ -20,7 +20,6 @@ async fn main() -> std::io::Result<()> {
         configuration.application.host, configuration.application.port
     );
     let listener = TcpListener::bind(address)?;
-    let server = run(listener, connection_pool).await?;
-    server.await?;
+    run(listener, connection_pool).await?.await?;
     Ok(())
 }
