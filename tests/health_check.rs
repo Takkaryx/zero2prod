@@ -3,6 +3,7 @@
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
+use zero2prod::email_client::EmailClient;
 
 use once_cell::sync::Lazy;
 use zero2prod::configuration::{DatabaseSettings, get_configuration};
@@ -34,10 +35,20 @@ async fn spawn_app() -> TestApp {
     let mut configuration = get_configuration().expect("Failed to read the configuration");
     configuration.database.database_name = Uuid::new_v4().to_string();
     let connection_pool = configure_database(&configuration.database).await;
-    let server = zero2prod::startup::run(listener, connection_pool.clone())
+    let sender_email = configuration
+        .email_client
+        .sender()
+        .expect("Invalid Email address in configuration");
+    let email_client = EmailClient::new(
+        configuration.email_client.base_url,
+        sender_email,
+        configuration.email_client.authorization_token,
+    );
+    let server = zero2prod::startup::run(listener, connection_pool.clone(), email_client)
         .await
         .expect("Failed to find address");
-    let _ = tokio::spawn(server);
+
+    std::mem::drop(tokio::spawn(server));
 
     TestApp {
         address,
@@ -151,7 +162,7 @@ async fn subscribe_returns_a_400_when_fields_are_present_but_invalid() {
     for (body, description) in test_cases {
         // Act
         let response = client
-            .post(&format!("{}/subscriptions", &app.address))
+            .post(format!("{}/subscriptions", &app.address))
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body(body)
             .send()
