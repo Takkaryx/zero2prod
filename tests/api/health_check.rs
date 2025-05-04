@@ -5,14 +5,9 @@ use crate::helpers::spawn_app;
 #[tokio::test]
 async fn health_check_works() {
     let application = spawn_app().await;
-    let client = reqwest::Client::new();
 
     // Act
-    let response = client
-        .get(format!("{}/health_check", &application.address))
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let response = application.post_health_check().await;
 
     // Assert
     assert!(response.status().is_success());
