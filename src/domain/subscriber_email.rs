@@ -7,6 +7,12 @@ pub struct SubscriberEmail {
     mail: String,
 }
 
+impl std::fmt::Display for SubscriberEmail {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.mail.fmt(f)
+    }
+}
+
 impl SubscriberEmail {
     pub fn parse(s: String) -> Result<SubscriberEmail, String> {
         let ret = Self { mail: s };
