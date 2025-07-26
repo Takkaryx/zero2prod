@@ -3,9 +3,10 @@
 use crate::{
     configuration::{DatabaseSettings, Settings},
     email_client::EmailClient,
-    routes::{confirm, health_check, publish_newsletter, subscribe},
+    routes::{confirm, health_check, home, login, login_form, publish_newsletter, subscribe},
 };
 use actix_web::{App, HttpServer, dev::Server, web};
+use secrecy::SecretString;
 use sqlx::{PgPool, postgres::PgPoolOptions};
 use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
@@ -40,6 +41,7 @@ impl Application {
             connection_pool,
             email_client,
             configuration.application.base_url,
+            HmacSecret(configuration.application.hmac_secret),
         )
         .await?;
 
@@ -57,11 +59,15 @@ impl Application {
 
 pub struct ApplicationBaseUrl(pub String);
 
+#[derive(Clone, Debug)]
+pub struct HmacSecret(pub SecretString);
+
 pub async fn run(
     listener: TcpListener,
     db_pool: PgPool,
     email_client: EmailClient,
     base_url: String,
+    hmac_secret: HmacSecret,
 ) -> Result<Server, std::io::Error> {
     // Wrap the connection in a smart pointer
     let db_pool = web::Data::new(db_pool);
@@ -73,6 +79,9 @@ pub async fn run(
         // App is the application logic, routing, middleware, request handlers, etc.
         App::new()
             .wrap(TracingLogger::default())
+            .route("/", web::get().to(home))
+            .route("/login", web::get().to(login_form))
+            .route("/login", web::post().to(login))
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
             .route("/subscriptions/confirm", web::get().to(confirm))
@@ -80,6 +89,7 @@ pub async fn run(
             .app_data(db_pool.clone())
             .app_data(email_client.clone())
             .app_data(base_url.clone())
+            .app_data(hmac_secret.clone())
     })
     .listen(listener)?
     .run();
